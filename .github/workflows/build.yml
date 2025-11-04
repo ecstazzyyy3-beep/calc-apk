@@ -1,4 +1,4 @@
-name: Build APK (Fast Version)
+name: Build APK (Fixed License Issue)
 
 on:
   push:
@@ -27,6 +27,7 @@ jobs:
         run: |
           echo "🚀 Starting build..."
           buildozer init || true
+          yes | sdkmanager --licenses || true   # <-- ДОДАНО ЦЕ
           buildozer android debug
 
       - name: 📦 Upload artifact
