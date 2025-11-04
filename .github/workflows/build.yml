@@ -1,5 +1,4 @@
-#version2
-name: Build APK (Calc Edition)
+name: Build APK (Fast Version)
 
 on:
   push:
@@ -8,37 +7,30 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up dependencies
+      - name: ⚙️ Setup environment
         run: |
+          echo "🔹 Updating system..."
           sudo apt-get update -y
-          sudo apt-get install -y python3 python3-pip openjdk-17-jdk zip unzip git
-          pip install --upgrade pip setuptools wheel
-          pip install buildozer cython virtualenv
+          echo "🔹 Installing dependencies..."
+          sudo apt-get install -y python3 python3-pip openjdk-17-jdk zip unzip libgl1-mesa-dev
+          echo "🔹 Installing Buildozer..."
+          pip install --upgrade pip
+          pip install buildozer cython kivy[base]
 
-      - name: Prepare buildozer project
+      - name: 🧱 Build APK
         run: |
-          if [ ! -f buildozer.spec ]; then
-            buildozer init
-          fi
-          echo "requirements = python3,kivy" >> buildozer.spec
-          echo "package.domain = org.example" >> buildozer.spec
-          echo "package.name = calculator" >> buildozer.spec
-          echo "title = Калькулятор" >> buildozer.spec
-
-      - name: Build APK
-        run: |
+          echo "🚀 Starting build..."
+          buildozer init || true
           buildozer android debug
-        env:
-          BUILDOZER_WARN_ON_ROOT: 0
 
-      - name: Upload APK
+      - name: 📦 Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: calculator-apk
+          name: calc-apk
           path: bin/*.apk
