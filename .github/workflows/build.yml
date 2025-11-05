@@ -1,4 +1,4 @@
-name: Build APK (Fixed License Issue)
+name: Build APK (Calc Edition)
 
 on:
   push:
@@ -10,27 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup environment
+      - name: Setup environment
         run: |
-          echo "🔹 Updating system..."
-          sudo apt-get update -y
-          echo "🔹 Installing dependencies..."
-          sudo apt-get install -y python3 python3-pip openjdk-17-jdk zip unzip libgl1-mesa-dev
-          echo "🔹 Installing Buildozer..."
-          pip install --upgrade pip
-          pip install buildozer cython kivy[base]
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip openjdk-17-jdk zip unzip
+          pip install buildozer cython
 
-      - name: 🧱 Build APK
+      - name: Accept Android SDK licenses
         run: |
-          echo "🚀 Starting build..."
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          yes | sdkmanager --licenses || true
+          yes | sdkmanager --update
+
+      - name: Build APK with Buildozer
+        run: |
           buildozer init || true
-          yes | sdkmanager --licenses || true   # <-- ДОДАНО ЦЕ
           buildozer android debug
 
-      - name: 📦 Upload artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: calc-apk
